@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.example.farajaplatform.FarajaPlatformApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 47.835 s - in com.example.farajaplatform.FarajaPlatformApplicationTests
