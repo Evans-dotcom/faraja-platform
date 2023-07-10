@@ -1,38 +1,54 @@
 package com.example.farajaplatform.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Primary;
 
 import java.sql.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "profile")
+@Table(name = "person_profile")
 public class WidowProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @NotNull
     private String title;
+    @NotNull
+    @Column(name = "BriefDescription",length = 3000,nullable = false)
     private String BriefDescription;
+    @NotNull
     private Integer nationalID;
+    @NotNull
     private String county;
+    @NotNull
     private String subcounty;
+    @NotNull
     private Integer Amount;
+    @NotNull
     private Date date;
+    @NotNull
+    @Email
     private String email;
+    @NotNull
+    @NotEmpty
     private Integer phoneNo;
+
     private String FbAccount;
     private String TwitterAccount;
+    @NotEmpty
+    @NotNull
     private String fileName;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "person_id", nullable = false)
-    private Person person;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
+    private Set<Person> persons = new HashSet<>();
 
 
-    public WidowProfile(Person person) {
-        this.person = person;
-    }
 
     public WidowProfile() {
     }
@@ -155,5 +171,13 @@ public class WidowProfile {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public Set<Person> getPersons() {
+        return persons;
+    }
+
+    public void setPersons(Set<Person> persons) {
+        this.persons = persons;
     }
 }

@@ -1,10 +1,7 @@
 package com.example.farajaplatform.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,32 +12,26 @@ public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Integer id;
     private String firstName;
     private String lastName;
     @Email
     private String email;
     private String password;
-    @NotEmpty
     private String fileName;
     private boolean status;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id desc")
-    private List<VerificationToken> verificationTokens = new ArrayList<>();
-    /** Has the users email been verified? */
-    @Column(name = "email_verified", nullable = false)
-    private Boolean emailVerified = false;
-
-    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id desc")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "widowProfile_id")
     private WidowProfile widowProfile;
+    @ManyToOne
+    @JoinColumn(name="createdBy", referencedColumnName = "id")
+    private Admin createdBy;
+
+    
 
     public Person() {
-    }
-
-    public Person(WidowProfile widowProfile) {
-        this.widowProfile = widowProfile;
     }
 
     public Person(Integer id, String firstName,
@@ -102,27 +93,6 @@ public class Person {
         return null;
     }
 
-    public Person(List<VerificationToken> verificationTokens, Boolean emailVerified) {
-        this.verificationTokens = verificationTokens;
-        this.emailVerified = emailVerified;
-    }
-
-    public List<VerificationToken> getVerificationTokens() {
-        return verificationTokens;
-    }
-
-    public void setVerificationTokens(List<VerificationToken> verificationTokens) {
-        this.verificationTokens = verificationTokens;
-    }
-
-    public Boolean getEmailVerified() {
-        return emailVerified;
-    }
-
-    public void setEmailVerified(Boolean emailVerified) {
-        this.emailVerified = emailVerified;
-    }
-
     public WidowProfile getWidowProfile() {
         return widowProfile;
     }
@@ -131,7 +101,11 @@ public class Person {
         this.widowProfile = widowProfile;
     }
 
-    public Boolean isEmailVerified() {
-        return emailVerified;
+    public Admin getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Admin createdBy) {
+        this.createdBy = createdBy;
     }
 }
