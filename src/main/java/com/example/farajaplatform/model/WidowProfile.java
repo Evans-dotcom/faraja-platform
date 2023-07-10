@@ -17,32 +17,26 @@ public class WidowProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotNull
+
+    @Column(name="title",length = 50)
     private String title;
-    @NotNull
+
     @Column(name = "BriefDescription",length = 3000,nullable = false)
     private String BriefDescription;
-    @NotNull
-    private Integer nationalID;
-    @NotNull
     private String county;
-    @NotNull
+
     private String subcounty;
-    @NotNull
+
     private Integer Amount;
-    @NotNull
-    private Date date;
-    @NotNull
+
+    private String date;
     @Email
     private String email;
-    @NotNull
-    @NotEmpty
+
     private Integer phoneNo;
 
     private String FbAccount;
     private String TwitterAccount;
-    @NotEmpty
-    @NotNull
     private String fileName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
@@ -53,11 +47,10 @@ public class WidowProfile {
     public WidowProfile() {
     }
 
-    public WidowProfile(String title, String briefDescription, Integer nationalID, String county, String subcounty, Integer amount, Date date, String email,
+    public WidowProfile(String title, String briefDescription, Integer nationalID, String county, String subcounty, Integer amount, String date, String email,
                         Integer phoneNo, String fbAccount, String twitterAccount, String fileName) {
         this.title = title;
         BriefDescription = briefDescription;
-        this.nationalID = nationalID;
         this.county = county;
         this.subcounty = subcounty;
         Amount = amount;
@@ -93,14 +86,6 @@ public class WidowProfile {
         BriefDescription = briefDescription;
     }
 
-    public Integer getNationalID() {
-        return nationalID;
-    }
-
-    public void setNationalID(Integer nationalID) {
-        this.nationalID = nationalID;
-    }
-
     public String getCounty() {
         return county;
     }
@@ -125,11 +110,11 @@ public class WidowProfile {
         Amount = amount;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

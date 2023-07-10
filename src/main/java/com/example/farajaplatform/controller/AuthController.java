@@ -13,6 +13,9 @@ import com.example.farajaplatform.security.JWTGenerator;
 import com.example.farajaplatform.service.*;
 import com.example.farajaplatform.service.FileUploaderService;
 import com.example.farajaplatform.service.MapperService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,8 +27,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -57,6 +62,10 @@ public class AuthController {
     WidowService widowService;
     @Autowired
     WidowProfile widowProfile;
+//    @Autowired
+//    FileStorageService fileStorageService;
+//    @Autowired
+//    ObjectMapper objectMapper;
 
     @PostMapping("api/v1/adminRegister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
@@ -122,7 +131,8 @@ public class AuthController {
 
 
     @PostMapping("/api/v1/personRegister")
-    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file)  {
+    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
+
         try {
             SuccessandMessageDto response = new SuccessandMessageDto();
             Person person = mapperService.mapForm(data, Person.class);
@@ -140,6 +150,20 @@ public class AuthController {
             return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
         }
     }
+//    @PostMapping("/api/v1/personRegister")
+//   public Person registerPerson(@Valid @RequestParam("data") String data, @RequestParam("file") MultipartFile file) throws IOException {
+//         Person response = null;
+//    try {
+//        String fileName = fileStorageService.storeFile(file);
+//
+//        ServletUriComponentsBuilder.fromCurrentContextPath().path(fileName).toUriString();
+//        response = objectMapper.readValue(data, Person.class);
+//        response.setFileName(file.getOriginalFilename());
+//    } catch (JsonProcessingException e) {
+//        e.printStackTrace();
+//    }
+//        return response;
+//    }
 
     @PostMapping("api/v1/personLogin")
     public ResponseEntity<PersonLoginResponseDto> PersonLogin(@RequestBody PersonLoginDto personLoginDto) {
@@ -207,10 +231,12 @@ public class AuthController {
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
         try {
+            System.out.println(data);
             SuccessandMessageDto response = new SuccessandMessageDto();
             WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
             widowProfile.setFileName(imageUploaderService.uploadImage(file));
             widowService.registerWidowProfile(widowProfile);
+            System.out.println(imageUploaderService.uploadImage(file));
             response.setMessage("Profile Created  Successfully !!");
             response.setSuccess(true);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
@@ -221,16 +247,37 @@ public class AuthController {
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
         }
     }
-//
-//    @GetMapping
-//    public ResponseEntity<List<WidowProfiles>> findAllWidowProfile() {
-//        return ResponseEntity.ok(WidowProfile);
-//    }
+
+    @GetMapping("/api/v1/view")
+    public List<Person> findAllPerson(){
+        return personRepository.findAll();
+    }
+
 
     //todo load more profiles in Db
     //todo logout endpoint
     //todo Mpesa endpoints
-    //todo admin to create personProfile
     //todo email verification
+
+
+
+    @PostMapping("/api/v1/personLogout")
+    public ResponseEntity<SuccessandMessageDto> personLogout(HttpServletRequest request) {
+      String authorizationHeader = request.getHeader("Authorization");
+
+      if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+
+          String token = authorizationHeader.substring(7);
+
+          SuccessandMessageDto response = new SuccessandMessageDto();
+          response.setMessage("Logout successful");
+          response.setSuccess(true);
+          return new ResponseEntity<>(response, HttpStatus.OK);
+      }
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        response.setMessage("Invalid request");
+        response.setSuccess(false);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
 }

@@ -15,7 +15,7 @@ public class WidowService {
     WidowProfileRepository widowProfileRepository;
 
     public WidowProfile registerWidowProfile(WidowProfile widowProfile) throws ProfileAlreadyExistsException{
-        if (widowProfileRepository.findByNationalID(widowProfile.getNationalID()).isPresent()){
+        if (widowProfileRepository.findByEmailIgnoreCase(widowProfile.getEmail()).isPresent()){
             throw new ProfileAlreadyExistsException();
         }
         return widowProfileRepository.save(widowProfile);

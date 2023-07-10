@@ -15,6 +15,11 @@ public class FarajaPlatformApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FarajaPlatformApplication.class, args);
 	}
+
+//	@Bean
+//	public ObjectMapper getObjectMapper() {
+//		return new ObjectMapper();
+//	}
 	@Bean
 	Person setPerson(){
 		return new Person();

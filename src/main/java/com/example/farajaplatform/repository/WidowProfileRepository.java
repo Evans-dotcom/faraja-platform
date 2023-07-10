@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface WidowProfileRepository extends JpaRepository<WidowProfile,Integer> {
 
-    Optional<WidowProfile> findByNationalID(Integer nationalID);
-    boolean existsByNationalID(Integer nationalID);
+    Optional<WidowProfile> findByEmailIgnoreCase(String email);
+    boolean existsByEmail(String email);
 
 }

@@ -18,11 +18,11 @@ public class MapperService {
 //    }
 
     //can be used for any class
-    public <T> T mapForm(String form, Class<T> classValue) {
+    public <T> T mapForm(String data, Class<T> classValue) {
         JsonMapper mapper = new JsonMapper();
         T t = null;
         try {
-            t = mapper.readValue(form,classValue);
+            t = mapper.readValue(data,classValue);
         } catch (Exception e) {
             System.out.println(e);
         }
