@@ -221,9 +221,10 @@ public class AuthController {
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
         }
     }
-//    }@GetMapping
-//    public ResponseEntity<List<Customer>> findAllCustomers() {
-//        return ResponseEntity.ok(CUSTOMERS);
+//
+//    @GetMapping
+//    public ResponseEntity<List<WidowProfiles>> findAllWidowProfile() {
+//        return ResponseEntity.ok(WidowProfile);
 //    }
 
     //todo load more profiles in Db
