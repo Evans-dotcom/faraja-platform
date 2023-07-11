@@ -45,6 +45,10 @@ public class Person {
         this.status = status;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getFirstName() {
         return firstName;
     }

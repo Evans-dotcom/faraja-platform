@@ -1,6 +1,7 @@
 package com.example.farajaplatform.controller;
 
 import com.example.farajaplatform.dto.*;
+import com.example.farajaplatform.exception.PersonNotFoundException;
 import com.example.farajaplatform.exception.ProfileAlreadyExistsException;
 import com.example.farajaplatform.exception.UserAlreadyExistsException;
 import com.example.farajaplatform.model.Admin;
@@ -226,6 +227,23 @@ public class AuthController {
         response.setSuccess(true);
         return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.OK);
     }
+    @DeleteMapping("/api/v1/personDelete/{id}")
+    public ResponseEntity<SuccessandMessageDto> deletePerson(@PathVariable("id") Integer id) {
+        try {
+            personService.deletePerson(id);
+
+            SuccessandMessageDto response = new SuccessandMessageDto();
+            response.setMessage("Person deleted successfully!");
+            response.setSuccess(true);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (PersonNotFoundException ex) {
+            SuccessandMessageDto response = new SuccessandMessageDto();
+            response.setMessage("Person not found!");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 
     @PostMapping("/api/v1/widowRegister")
@@ -258,6 +276,8 @@ public class AuthController {
     //todo logout endpoint
     //todo Mpesa endpoints
     //todo email verification
+
+    @GetMapping("/api/v1/pics")
 
 
 
