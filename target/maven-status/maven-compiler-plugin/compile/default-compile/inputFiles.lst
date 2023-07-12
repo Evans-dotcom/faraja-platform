@@ -2,6 +2,7 @@ C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\fa
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\service\CustomUserDetailsService.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\dto\PersonPasswordUpdate.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\dto\SuccessandMessageDto.java
+C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\exception\PersonNotFoundException.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\service\MapperService.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\dto\PersonUpdate.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\model\FileStorageProperties.java

@@ -1,4 +1,5 @@
 com\example\farajaplatform\dto\SuccessandMessageDto.class
+com\example\farajaplatform\exception\PersonNotFoundException.class
 com\example\farajaplatform\service\MapperService.class
 com\example\farajaplatform\security\SecurityConstants.class
 com\example\farajaplatform\dto\PersonDetails.class

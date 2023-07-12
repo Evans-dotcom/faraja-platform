@@ -16,26 +16,4 @@ public class FarajaPlatformApplication {
 		SpringApplication.run(FarajaPlatformApplication.class, args);
 	}
 
-//	@Bean
-//	public ObjectMapper getObjectMapper() {
-//		return new ObjectMapper();
-//	}
-	@Bean
-	Person setPerson(){
-		return new Person();
-	}
-
-	@Bean
-	WidowProfile setWidowProfile(){
-		return new WidowProfile();
-	}
-//	@Bean
-//	SecurityConfig setSecurityConfig(){
-//		return new SecurityConfig();
-//	}
-//	@Bean
-//	CustomUserDetailsService setCustomUserDetailsService(){
-//		return new CustomUserDetailsService();
-//	}
-
 }
