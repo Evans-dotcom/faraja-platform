@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,7 +42,6 @@ public class AuthController {
     AdminRepository adminRepository;
     @Autowired
     PersonRepository personRepository;
-    @Autowired
     Person person;
     @Autowired
     AuthenticationManager authenticationManager;
@@ -61,12 +61,8 @@ public class AuthController {
     PersonService personService;
     @Autowired
     WidowService widowService;
-    @Autowired
     WidowProfile widowProfile;
-//    @Autowired
-//    FileStorageService fileStorageService;
-//    @Autowired
-//    ObjectMapper objectMapper;
+
 
     @PostMapping("api/v1/adminRegister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
@@ -83,33 +79,50 @@ public class AuthController {
 
     @PostMapping("/api/v1/admin/personRegister")
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                               @RequestHeader(name="Authorization") String token) throws IOException{
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        if(personRepository.existsByEmail(person.getEmail())) {
-            response.setMessage("Email is already registered !!");
-            response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.BAD_REQUEST);
-        }
-        person = new Person();
-        person.setFirstName(person.getFirstName());
-        person.setLastName(person.getLastName());
-        person.setEmail(person.getEmail());
-        person.setPassword(passwordEncoder.encode(person.getPassword()));
-        person.setFileName(person.getFileName());
-        person.setStatus(true);
-        try {
+                                                               @RequestHeader(name="Authorization") String token) throws IOException, UserAlreadyExistsException {
+//        SuccessandMessageDto response = new SuccessandMessageDto();
+//        if(personRepository.existsByEmail(person.getEmail())) {
+//            response.setMessage("Email is already registered !!");
+//            response.setSuccess(false);
+//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.BAD_REQUEST);
+//        }
+//        person = new Person();
+//        person.setFirstName(person.getFirstName());
+//        person.setLastName(person.getLastName());
+//        person.setEmail(person.getEmail());
+//        person.setPassword(person.getPassword());
+//        person.setFileName(person.getFileName());
+//        person.setStatus(true);
+//        try {
+//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
+//        } catch(Exception e) {
+//            e.printStackTrace();
+//            System.out.println(e.getMessage());
+//            response.setMessage("Unauthorized request");
+//            response.setSuccess(false);
+//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.UNAUTHORIZED);
+//        }
+//        personRepository.save(person);
+//        response.setMessage("Member Registered Successfully !!");
+//        response.setSuccess(true);
+//        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+//    }
+            SuccessandMessageDto response = new SuccessandMessageDto();
+            try{
+            Person person = mapperService.mapForm(data, Person.class);
+            person.setFileName(fileUploaderService.uploadFile(file));
+            personService.registerPerson(person);
+            System.out.println(fileUploaderService.uploadFile(file));
+            response.setMessage("Member Registered Successfully !!");
+            response.setSuccess(true);
             person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            response.setMessage("Unauthorized request");
+            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+
+            }catch (UserAlreadyExistsException ex) {
+            response.setMessage("Email Already Taken");
             response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
         }
-        personRepository.save(person);
-        response.setMessage("Member Registered Successfully !!");
-        response.setSuccess(true);
-        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
     @PostMapping("api/v1/adminLogin")
@@ -129,7 +142,6 @@ public class AuthController {
         responseDto.setAdmin(admin.getUsername(), admin.getId());
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
-
 
     @PostMapping("/api/v1/personRegister")
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
@@ -151,20 +163,6 @@ public class AuthController {
             return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
         }
     }
-//    @PostMapping("/api/v1/personRegister")
-//   public Person registerPerson(@Valid @RequestParam("data") String data, @RequestParam("file") MultipartFile file) throws IOException {
-//         Person response = null;
-//    try {
-//        String fileName = fileStorageService.storeFile(file);
-//
-//        ServletUriComponentsBuilder.fromCurrentContextPath().path(fileName).toUriString();
-//        response = objectMapper.readValue(data, Person.class);
-//        response.setFileName(file.getOriginalFilename());
-//    } catch (JsonProcessingException e) {
-//        e.printStackTrace();
-//    }
-//        return response;
-//    }
 
     @PostMapping("api/v1/personLogin")
     public ResponseEntity<PersonLoginResponseDto> PersonLogin(@RequestBody PersonLoginDto personLoginDto) {
@@ -249,7 +247,6 @@ public class AuthController {
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
         try {
-            System.out.println(data);
             SuccessandMessageDto response = new SuccessandMessageDto();
             WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
             widowProfile.setFileName(imageUploaderService.uploadImage(file));
@@ -258,10 +255,11 @@ public class AuthController {
             response.setMessage("Profile Created  Successfully !!");
             response.setSuccess(true);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+
         } catch (ProfileAlreadyExistsException ex) {
             SuccessandMessageDto response = new SuccessandMessageDto();
-            response.setMessage("NationalID Already In Use");
-            response.setSuccess(true);
+            response.setMessage("Email Already In Use");
+            response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
         }
     }
@@ -273,13 +271,13 @@ public class AuthController {
 
 
     //todo load more profiles in Db
-    //todo logout endpoint
     //todo Mpesa endpoints
     //todo email verification
 
-    @GetMapping("/api/v1/pics")
-
-
+//    @GetMapping("/api/v1/pics")
+//    public List<uploads> uploads(){
+//        return uploads.get();
+//    }
 
     @PostMapping("/api/v1/personLogout")
     public ResponseEntity<SuccessandMessageDto> personLogout(HttpServletRequest request) {
