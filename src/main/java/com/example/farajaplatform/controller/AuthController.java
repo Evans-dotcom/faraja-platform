@@ -242,8 +242,6 @@ public class AuthController {
         }
     }
 
-
-
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
         try {
