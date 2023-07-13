@@ -1,6 +1,5 @@
 package com.example.farajaplatform.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,7 +8,6 @@ import org.springframework.context.annotation.Primary;
 
 import java.sql.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,12 +39,10 @@ public class WidowProfile {
     private String TwitterAccount;
     private String fileName;
 
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
-//    private Set<Person> persons = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
+    private Set<Person> persons = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "widowProfile", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Person> persons;
+
 
     public WidowProfile() {
     }
@@ -162,11 +158,11 @@ public class WidowProfile {
         this.fileName = fileName;
     }
 
-    public List<Person> getPersons() {
+    public Set<Person> getPersons() {
         return persons;
     }
 
-    public void setPersons(List<Person> persons) {
+    public void setPersons(Set<Person> persons) {
         this.persons = persons;
     }
 }

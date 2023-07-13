@@ -63,6 +63,7 @@ public class AuthController {
     WidowService widowService;
     WidowProfile widowProfile;
 
+
     @PostMapping("api/v1/adminRegister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
         if(adminRepository.existsByUsername(adminDto.getUsername())) {
@@ -80,8 +81,8 @@ public class AuthController {
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
                                                                @RequestHeader(name="Authorization") String token) throws IOException, UserAlreadyExistsException {
 
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        try{
+            SuccessandMessageDto response = new SuccessandMessageDto();
+            try{
             Person person = mapperService.mapForm(data, Person.class);
             person.setFileName(fileUploaderService.uploadFile(file));
             personService.registerPerson(person);
@@ -91,29 +92,8 @@ public class AuthController {
             person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
-        }catch (UserAlreadyExistsException ex) {
+            }catch (UserAlreadyExistsException ex) {
             response.setMessage("Email Already Taken");
-            response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
-        }
-    }
-    @PostMapping("/api/v1/admin/personProfile")
-    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                               @RequestHeader(name="Authorization") String token) throws IOException, UserAlreadyExistsException {
-
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        try{
-            WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
-            widowProfile.setFileName(imageUploaderService.uploadImage(file));
-            widowService.registerWidowProfile(widowProfile);
-            System.out.println(imageUploaderService.uploadImage(file));
-            response.setMessage("Profile Created  Successfully !!");
-            response.setSuccess(true);
-            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
-
-        }catch (ProfileAlreadyExistsException ex) {
-            response.setMessage("Email Already In Use");
             response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
         }
@@ -235,11 +215,6 @@ public class AuthController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping("/api/v1/view")
-    public List<Person> findAllPerson(){
-        return personRepository.findAll();
-    }
-
 
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
@@ -259,6 +234,11 @@ public class AuthController {
             response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/api/v1/view")
+    public List<Person> findAllPerson(){
+        return personRepository.findAll();
     }
 
 

@@ -17,5 +17,12 @@ public class FarajaPlatformApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FarajaPlatformApplication.class, args);
 	}
-
+//    @Bean
+//	Person setPerson(){
+//		return new Person();
+// }
+//    @Bean
+//	WidowProfile setWidowProfile(){
+//		return new WidowProfile();
+// }
 }

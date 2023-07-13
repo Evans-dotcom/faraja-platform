@@ -3,7 +3,8 @@ package com.example.farajaplatform.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="person")
@@ -21,14 +22,14 @@ public class Person {
     private String fileName;
     private boolean status;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "widowProfile_id")
     private WidowProfile widowProfile;
     @ManyToOne
     @JoinColumn(name="createdBy", referencedColumnName = "id")
     private Admin createdBy;
 
-
+    
 
     public Person() {
     }
