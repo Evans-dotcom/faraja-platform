@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class WidowService {
 
-    @Autowired
     WidowProfile widowProfile;
     @Autowired
     WidowProfileRepository widowProfileRepository;

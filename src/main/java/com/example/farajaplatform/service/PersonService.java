@@ -15,7 +15,6 @@ public class PersonService {
 
     @Autowired
     PersonRepository personRepository;
-    @Autowired
     Person person;
     @Autowired
     SecurityConfig securityConfig;

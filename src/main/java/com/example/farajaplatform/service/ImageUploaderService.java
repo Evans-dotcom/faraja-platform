@@ -10,21 +10,16 @@ import java.io.IOException;
 public class ImageUploaderService {
 
     public String uploadImage(MultipartFile file) throws IOException {
-        String fileName = file.getOriginalFilename();
-        String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\src\\main\\resources\\Profiles\\";
-        String filePath = storageLocation + fileName;
-        file.transferTo(new File(filePath));
+        try {
+            String fileName = file.getOriginalFilename();
+            String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\uploads\\";
+            String filePath = storageLocation + fileName;
+            file.transferTo(new File(filePath));
 
-        return filePath;
-
+            return filePath;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
-//public String uploadImage(MultipartFile file) {
-//    try{
-//        file.transferTo(new File("C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\src\\main\\resources\\Profiles\\"+file.getOriginalFilename()));
-//    }catch(Exception e){
-//        System.out.println(e);
-//    }
-//    return file.getOriginalFilename();
-//}
-//}

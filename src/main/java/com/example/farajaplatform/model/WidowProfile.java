@@ -47,7 +47,7 @@ public class WidowProfile {
     public WidowProfile() {
     }
 
-    public WidowProfile(String title, String briefDescription, Integer nationalID, String county, String subcounty, Integer amount, String date, String email,
+    public WidowProfile(String title, String briefDescription, String county, String subcounty, Integer amount, String date, String email,
                         Integer phoneNo, String fbAccount, String twitterAccount, String fileName) {
         this.title = title;
         BriefDescription = briefDescription;

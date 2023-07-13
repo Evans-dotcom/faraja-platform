@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/personLogin").permitAll()
                 .requestMatchers("/api/v1/updatePerson").permitAll()
                 .requestMatchers("/api/v1/updatePersonPassword").permitAll()
+                .requestMatchers("/api/v1/personDelete").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasAuthority(UserType.ADMIN.toString())
                 .anyRequest().authenticated()
                 .and()
