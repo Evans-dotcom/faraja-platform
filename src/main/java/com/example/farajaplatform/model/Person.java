@@ -30,7 +30,6 @@ public class Person {
     private Admin createdBy;
 
     
-
     public Person() {
     }
 
