@@ -5,6 +5,7 @@ C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\fa
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\exception\PersonNotFoundException.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\service\MapperService.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\dto\PersonUpdate.java
+C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\Application.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\model\Person.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\repository\PersonRepository.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\security\JWTAuthenticationFilter.java
@@ -28,5 +29,4 @@ C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\fa
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\service\PersonService.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\dto\PersonLoginResponseDto.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\exception\UserNotVerifiedException.java
-C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\FarajaPlatformApplication.java
 C:\Users\emmanuel kimutai\Downloads\faraja-platform\src\main\java\com\example\farajaplatform\service\ImageUploaderService.java
