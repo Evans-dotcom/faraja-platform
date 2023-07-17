@@ -41,6 +41,9 @@ public class WidowProfile {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
     private Set<Person> persons = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name="createdBy", referencedColumnName = "id")
+    private Admin createdBy;
 
 
 
@@ -164,5 +167,13 @@ public class WidowProfile {
 
     public void setPersons(Set<Person> persons) {
         this.persons = persons;
+    }
+
+    public Admin getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Admin createdBy) {
+        this.createdBy = createdBy;
     }
 }

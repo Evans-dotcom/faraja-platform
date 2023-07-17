@@ -27,7 +27,7 @@ public class ImageController {
             try {
                 byte[] imageBytes = Files.readAllBytes(file.toPath());
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Adjust the media type based on your uploaded image format
+                        .contentType(MediaType.IMAGE_JPEG)
                         .body(imageBytes);
             } catch (IOException e) {
                 e.printStackTrace();

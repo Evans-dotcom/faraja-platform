@@ -13,9 +13,12 @@ import java.io.IOException;
 public class FileUploaderService {
 
         public String uploadFile (MultipartFile file) throws IOException {
+            if (file.isEmpty()){
+                throw new IllegalArgumentException("File Is Empty");
+            }
             try{
                 String fileName = file.getOriginalFilename();
-                String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\src\\main\\java\\com\\example\\farajaplatform\\FilestorageLocation\\";
+                String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\DocumentCertificates\\";
                 String filePath = storageLocation + fileName;
                 file.transferTo(new File(filePath));
 

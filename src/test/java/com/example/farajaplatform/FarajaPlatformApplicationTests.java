@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-@ContextConfiguration(classes = ApplicationTests.class )
-class ApplicationTests {
+@ContextConfiguration(classes = FarajaPlatformApplicationTests.class )
+class FarajaPlatformApplicationTests {
 
 	@Configuration
 	static class TestConfig {

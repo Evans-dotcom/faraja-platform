@@ -25,6 +25,9 @@ public class Person {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "widowProfile_id")
     private WidowProfile widowProfile;
+//@OneToOne
+//@JoinColumn(name = "user_id")
+//private User user;
     @ManyToOne
     @JoinColumn(name="createdBy", referencedColumnName = "id")
     private Admin createdBy;

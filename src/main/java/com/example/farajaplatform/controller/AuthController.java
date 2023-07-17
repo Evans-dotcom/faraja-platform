@@ -1,6 +1,7 @@
 package com.example.farajaplatform.controller;
 
 import com.example.farajaplatform.dto.*;
+import com.example.farajaplatform.exception.AdminNotFoundException;
 import com.example.farajaplatform.exception.PersonNotFoundException;
 import com.example.farajaplatform.exception.ProfileAlreadyExistsException;
 import com.example.farajaplatform.exception.UserAlreadyExistsException;
@@ -10,17 +11,15 @@ import com.example.farajaplatform.model.UserType;
 import com.example.farajaplatform.model.WidowProfile;
 import com.example.farajaplatform.repository.AdminRepository;
 import com.example.farajaplatform.repository.PersonRepository;
+import com.example.farajaplatform.repository.WidowProfileRepository;
 import com.example.farajaplatform.security.JWTGenerator;
 import com.example.farajaplatform.service.*;
 import com.example.farajaplatform.service.FileUploaderService;
 import com.example.farajaplatform.service.MapperService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,11 +60,13 @@ public class AuthController {
     @Autowired
     WidowService widowService;
     WidowProfile widowProfile;
+    @Autowired
+    WidowProfileRepository widowProfileRepository;
 
 
     @PostMapping("api/v1/adminRegister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
-        if(adminRepository.existsByUsername(adminDto.getUsername())) {
+        if (adminRepository.existsByUsername(adminDto.getUsername())) {
             return new ResponseEntity<String>("Username is taken !! ", HttpStatus.BAD_REQUEST);
         }
         Admin admin = new Admin();
@@ -79,24 +79,46 @@ public class AuthController {
 
     @PostMapping("/api/v1/admin/personRegister")
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                               @RequestHeader(name="Authorization") String token) throws IOException, UserAlreadyExistsException {
+                                                               @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
 
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            try{
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        try {
             Person person = mapperService.mapForm(data, Person.class);
             person.setFileName(fileUploaderService.uploadFile(file));
             personService.registerPerson(person);
             System.out.println(fileUploaderService.uploadFile(file));
             response.setMessage("Member Registered Successfully !!");
             response.setSuccess(true);
-            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
+            String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
+            Admin admin = adminRepository.findByUsername(adminUsername)
+                    .orElseThrow(() -> new AdminNotFoundException("Admin not found")); // You may need to handle this exception
+
+            person.setCreatedBy(admin);
+
+//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
-            }catch (UserAlreadyExistsException ex) {
+        } catch (UserAlreadyExistsException | AdminNotFoundException ex) {
             response.setMessage("Email Already Taken");
             response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
+            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
         }
+    }
+
+    @PostMapping("/api/v1/admin/personProfile")
+    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
+                                                                     @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
+
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
+        widowProfile.setFileName(imageUploaderService.uploadImage(file));
+        widowService.registerWidowProfile(widowProfile);
+        System.out.println(imageUploaderService.uploadImage(file));
+        response.setMessage("Profile Created Successfully !!");
+        response.setSuccess(true);
+        widowProfile.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
+        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+
     }
 
     @PostMapping("api/v1/adminLogin")
@@ -107,7 +129,7 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(adminDto.getUsername(), adminDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = jwtGenerator.generateToken(authentication,UserType.ADMIN.toString());
+        String token = jwtGenerator.generateToken(authentication, UserType.ADMIN.toString());
         AdminLoginResponseDto responseDto = new AdminLoginResponseDto();
         responseDto.setSuccess(true);
         responseDto.setMessage("login successful !!");
@@ -130,11 +152,11 @@ public class AuthController {
             response.setSuccess(true);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
-    }catch (UserAlreadyExistsException ex) {
-            SuccessandMessageDto response=new SuccessandMessageDto();
+        } catch (UserAlreadyExistsException ex) {
+            SuccessandMessageDto response = new SuccessandMessageDto();
             response.setMessage("Email Already Taken");
             response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.CONFLICT);
+            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
         }
     }
 
@@ -150,16 +172,16 @@ public class AuthController {
         responseDto.setSuccess(true);
         responseDto.setMessage("login successful !!");
         responseDto.setToken(token);
-       Person person = personRepository.findByEmailIgnoreCase(personLoginDto.getEmail()).orElseThrow();
-        responseDto.setPerson(person.getId(),person.getFirstName(),person.getLastName(), person.getEmail(), person.getPassword());
+        Person person = personRepository.findByEmailIgnoreCase(personLoginDto.getEmail()).orElseThrow();
+        responseDto.setPerson(person.getId(), person.getFirstName(), person.getLastName(), person.getEmail(), person.getPassword());
         return new ResponseEntity<PersonLoginResponseDto>(responseDto, HttpStatus.OK);
     }
 
     @PutMapping("/api/v1/updatePerson/{id}")
-    public ResponseEntity<SuccessandMessageDto>updatePerson(@PathVariable Integer id,@RequestBody PersonUpdate personUpdate){
+    public ResponseEntity<SuccessandMessageDto> updatePerson(@PathVariable Integer id, @RequestBody PersonUpdate personUpdate) {
         System.out.println("personUpdate");
-        SuccessandMessageDto response=new SuccessandMessageDto();
-        if (!(personRepository.existsById(id))){
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        if (!(personRepository.existsById(id))) {
             response.setMessage("Person does Not exist");
             response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response,
@@ -176,14 +198,14 @@ public class AuthController {
         personRepository.save(person);
         response.setMessage("Person updated successfully");
         response.setSuccess(true);
-        return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.OK);
+        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
     @PutMapping("/api/v1/updatePersonPassword/{id}")
-    public ResponseEntity<SuccessandMessageDto>updatePersonPassword(@PathVariable Integer id,@RequestBody PersonPasswordUpdate personPasswordUpdate){
+    public ResponseEntity<SuccessandMessageDto> updatePersonPassword(@PathVariable Integer id, @RequestBody PersonPasswordUpdate personPasswordUpdate) {
         System.out.println("personPasswordUpdate");
-        SuccessandMessageDto response=new SuccessandMessageDto();
-        if (!(personRepository.existsById(id))){
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        if (!(personRepository.existsById(id))) {
             response.setMessage("Person does Not exist");
             response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response,
@@ -197,8 +219,9 @@ public class AuthController {
         personRepository.save(person);
         response.setMessage("Person Password updated successfully");
         response.setSuccess(true);
-        return new ResponseEntity<SuccessandMessageDto>(response,HttpStatus.OK);
+        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
+
     @DeleteMapping("/api/v1/personDelete/{id}")
     public ResponseEntity<SuccessandMessageDto> deletePerson(@PathVariable("id") Integer id) {
         try {
@@ -218,38 +241,66 @@ public class AuthController {
 
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
-        try {
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
-            widowProfile.setFileName(imageUploaderService.uploadImage(file));
-            widowService.registerWidowProfile(widowProfile);
-            System.out.println(imageUploaderService.uploadImage(file));
-            response.setMessage("Profile Created  Successfully !!");
-            response.setSuccess(true);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+        SuccessandMessageDto response = new SuccessandMessageDto();
+        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
+        widowProfile.setFileName(imageUploaderService.uploadImage(file));
 
-        } catch (ProfileAlreadyExistsException ex) {
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            response.setMessage("Email Already In Use");
+        try {
+            widowService.registerWidowProfile(widowProfile.getEmail(), widowProfile);
+            response.setMessage("Profile Created Successfully!");
+            response.setSuccess(true);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (ProfileAlreadyExistsException e) {
+            response.setMessage("Profile with the same email already exists!");
             response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        } catch (PersonNotFoundException e) {
+            response.setMessage("User not found!");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping("/api/v1/view")
-    public List<Person> findAllPerson(){
+
+//    @PostMapping("/api/v1/widowRegister")
+//    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
+//        SuccessandMessageDto response = new SuccessandMessageDto();
+//        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
+//        widowProfile.setFileName(imageUploaderService.uploadImage(file));
+//        widowService.registerWidowProfile(widowProfile);
+//        System.out.println(imageUploaderService.uploadImage(file));
+//        response.setMessage("Profile Created  Successfully !!");
+//        response.setSuccess(true);
+//        response.setSuccess(true);
+//        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+//
+//    }
+
+    @GetMapping("/api/v1/adminviewPersons")
+    public List<Person> findAllPerson() {
         return personRepository.findAll();
     }
 
+    @GetMapping("/api/v1/adminviewProfiles")
+    public List<WidowProfile> findAllWidowProfile() {
+        return widowProfileRepository.findAll();
+    }
+
+    @GetMapping("/api/v1/listProfiles")
+    public List<WidowProfile> findAllWidowProfile(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+
+            String token = authorizationHeader.substring(7);
+            return widowProfileRepository.findAll();
+        }
+        return null;
+    }
 
     //todo load more profiles in Db
     //todo Mpesa endpoints
-    //todo email verification
 
-//    @GetMapping("/api/v1/pics")
-//    public List<uploads> uploads(){
-//        return uploads.get();
-//    }
 
     @PostMapping("/api/v1/personLogout")
     public ResponseEntity<SuccessandMessageDto> personLogout(HttpServletRequest request) {

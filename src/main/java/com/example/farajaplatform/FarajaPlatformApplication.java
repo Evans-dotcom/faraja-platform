@@ -6,9 +6,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
 @EnableWebMvc
-public class Application {
+public class FarajaPlatformApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(FarajaPlatformApplication.class, args);
 	}
 }
