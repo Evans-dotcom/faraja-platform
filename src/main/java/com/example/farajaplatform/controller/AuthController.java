@@ -90,15 +90,14 @@ public class AuthController {
             response.setMessage("Member Registered Successfully !!");
             response.setSuccess(true);
             String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
-            Admin admin = adminRepository.findByUsername(adminUsername)
-                    .orElseThrow(() -> new AdminNotFoundException("Admin not found")); // You may need to handle this exception
-
-            person.setCreatedBy(admin);
-
-//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
+//            Admin admin = adminRepository.findByUsername(adminUsername)
+//                    .orElseThrow(() -> new AdminNotFoundException("Admin not found")); // You may need to handle this exception
+//
+//            person.setCreatedBy(admin);
+            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
-        } catch (UserAlreadyExistsException | AdminNotFoundException ex) {
+        } catch (UserAlreadyExistsException ex) {
             response.setMessage("Email Already Taken");
             response.setSuccess(false);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
@@ -281,22 +280,22 @@ public class AuthController {
         return personRepository.findAll();
     }
 
-    @GetMapping("/api/v1/adminviewProfiles")
+    @GetMapping("/api/v1/viewProfiles")
     public List<WidowProfile> findAllWidowProfile() {
         return widowProfileRepository.findAll();
     }
 
-    @GetMapping("/api/v1/listProfiles")
-    public List<WidowProfile> findAllWidowProfile(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-
-            String token = authorizationHeader.substring(7);
-            return widowProfileRepository.findAll();
-        }
-        return null;
-    }
+//    @GetMapping("/api/v1/listProfiles")
+//    public List<WidowProfile> findAllWidowProfile(HttpServletRequest request) {
+//        String authorizationHeader = request.getHeader("Authorization");
+//
+//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+//
+//            String token = authorizationHeader.substring(7);
+//            return widowProfileRepository.findAll();
+//        }
+//        return null;
+//    }
 
     //todo load more profiles in Db
     //todo Mpesa endpoints

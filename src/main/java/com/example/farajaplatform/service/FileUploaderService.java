@@ -18,7 +18,7 @@ public class FileUploaderService {
             }
             try{
                 String fileName = file.getOriginalFilename();
-                String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\DocumentCertificates\\";
+              String storageLocation = "C:\\Users\\emmanuel kimutai\\Downloads\\faraja-platform\\src\\main\\java\\com\\example\\farajaplatform\\FilestorageLocation\\";
                 String filePath = storageLocation + fileName;
                 file.transferTo(new File(filePath));
 

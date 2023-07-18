@@ -7,7 +7,6 @@ com\example\farajaplatform\model\Admin.class
 com\example\farajaplatform\controller\ImageController.class
 com\example\farajaplatform\service\PersonService.class
 com\example\farajaplatform\controller\AuthController.class
-com\example\farajaplatform\Application.class
 com\example\farajaplatform\service\CustomUserDetailsService.class
 com\example\farajaplatform\service\FileUploaderService.class
 com\example\farajaplatform\dto\AdminLoginResponseDto.class
@@ -27,7 +26,6 @@ com\example\farajaplatform\model\UserType.class
 com\example\farajaplatform\security\JWTAuthEntryPoint.class
 com\example\farajaplatform\dto\AdminDetails.class
 com\example\farajaplatform\service\ImageUploaderService.class
-com\example\farajaplatform\exception\UserNotVerifiedException.class
 com\example\farajaplatform\repository\AdminRepository.class
 com\example\farajaplatform\repository\PersonRepository.class
 com\example\farajaplatform\security\JWTGenerator.class
