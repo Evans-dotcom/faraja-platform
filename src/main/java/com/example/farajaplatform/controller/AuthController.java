@@ -65,90 +65,6 @@ public class AuthController {
     @Autowired
     WidowProfileRepository widowProfileRepository;
 
-    @PostMapping("/adminRegister")
-    public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
-        adminService.registerAdmin(adminDto.getUsername(), adminDto.getPassword());
-        return new ResponseEntity<>("Admin Registered successfully!", HttpStatus.CREATED);
-    }
-//    @PostMapping("api/v1/adminRegister")
-//    public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
-//        if (adminRepository.existsByUsername(adminDto.getUsername())) {
-//            return new ResponseEntity<String>("Username is taken !! ", HttpStatus.BAD_REQUEST);
-//        }
-//        Admin admin = new Admin();
-//        admin.setUsername(adminDto.getUsername());
-//        admin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
-//
-//        adminRepository.save(admin);
-//        return new ResponseEntity<String>("Admin Registered successfully !! ", HttpStatus.CREATED);
-//    }
-
-//    @PostMapping("/api/v1/admin/personRegister")
-//    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-//                                                               @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
-//
-//        SuccessandMessageDto response = new SuccessandMessageDto();
-//        try {
-//            Person person = mapperService.mapForm(data, Person.class);
-//            person.setFileName(fileUploaderService.uploadFile(file));
-//            personService.registerPerson(person);
-//            System.out.println(fileUploaderService.uploadFile(file));
-//            response.setMessage("Member Registered Successfully !!");
-//            response.setStatus(200);
-//            String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
-//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
-//
-//        } catch (UserAlreadyExistsException ex) {
-//            response.setMessage("Email Already Taken");
-//            response.setStatus(409);
-//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
-//        }
-//    }
-@PostMapping("/admin/personRegister")
-public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data,
-                                                           @RequestPart("file") MultipartFile file,
-                                                           @RequestHeader(name = "Authorization") String token) throws UserAlreadyExistsException {
-    SuccessandMessageDto response = new SuccessandMessageDto();
-    adminService.registerPerson(data, file, token);
-    response.setMessage("Member Registered Successfully !!");
-    response.setStatus(200);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-}
-    @PostMapping("/api/v1/admin/personProfile")
-    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                                     @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
-
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
-        widowProfile.setFileName(imageUploaderService.uploadImage(file));
-        widowService.registerWidowProfile(widowProfile);
-        System.out.println(imageUploaderService.uploadImage(file));
-        response.setMessage("Profile Created Successfully !!");
-        response.setStatus(200);
-        widowProfile.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
-
-    }
-
-    @PostMapping("api/v1/adminLogin")
-    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminDto adminDto) {
-        System.out.println("adminLogin");
-        customUserDetailsService.setUserType(UserType.ADMIN);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(adminDto.getUsername(), adminDto.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String token = jwtGenerator.generateToken(authentication, UserType.ADMIN.toString());
-        AdminLoginResponseDto responseDto = new AdminLoginResponseDto();
-        responseDto.setStatus(200);
-        responseDto.setMessage("login successful !!");
-        responseDto.setToken(token);
-        Admin admin = adminRepository.findByUsername(adminDto.getUsername()).orElseThrow();
-        responseDto.setAdmin(admin.getUsername(), admin.getId());
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
-
     @PostMapping("/api/v1/personRegister")
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
 
@@ -182,7 +98,6 @@ public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("
         responseDto.setStatus(200);
         responseDto.setMessage("login successful !!");
         responseDto.setToken(token);
-        responseDto.getPerson();
         Person person = personRepository.findByEmailIgnoreCase(personLoginDto.getEmail()).orElseThrow();
         responseDto.setPerson(person.getId(), person.getFirstName(), person.getLastName(), person.getEmail(), person.getPassword());
         return new ResponseEntity<PersonLoginResponseDto>(responseDto, HttpStatus.OK);
@@ -233,22 +148,6 @@ public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("
         return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/api/v1/personDelete/{id}")
-    public ResponseEntity<SuccessandMessageDto> deletePerson(@PathVariable("id") Integer id) {
-        try {
-            personService.deletePerson(id);
-
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            response.setMessage("Person deleted successfully!");
-            response.setStatus(200);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (PersonNotFoundException ex) {
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            response.setMessage("Person not found!");
-            response.setStatus(404);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
 
     @PostMapping("/api/v1/widowRegister")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
@@ -272,49 +171,34 @@ public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("
         }
     }
 
-
-//    @PostMapping("/api/v1/widowRegister")
-//    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
-//        SuccessandMessageDto response = new SuccessandMessageDto();
-//        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
-//        widowProfile.setFileName(imageUploaderService.uploadImage(file));
-//        widowService.registerWidowProfile(widowProfile);
-//        System.out.println(imageUploaderService.uploadImage(file));
-//        response.setMessage("Profile Created  Successfully !!");
-//        response.setSuccess(true);
-//        response.setSuccess(true);
-//        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+//    @GetMapping("/api/v1/admin/viewPersons")
+//    public ResponseEntity<AllPersons> findAllPersons() {
+//        ArrayList<Person> allPersons = new ArrayList<>(personRepository.findAll());
+//        AllPersons personDetails = new AllPersons();
+//        ArrayList<UserDetails> userDetails = new ArrayList<>();
 //
+//        if(allPersons.size() > 0){
+//            personDetails.setStatus(200);
+//            personDetails.setMessage("All Persons found");
+//            UserDetails allUserDetails;
+//            for(Person person : allPersons){
+//                allUserDetails = new UserDetails();
+//                allUserDetails.setId(person.getId());
+//                allUserDetails.setEmail(person.getEmail());
+//                allUserDetails.setFirstName(person.getFirstName());
+//                allUserDetails.setLastName(person.getLastName());
+//                allUserDetails.setPassword(person.getPassword());
+//                userDetails.add(allUserDetails);
+//            }
+//            personDetails.setPersons(userDetails);
+//            return ResponseEntity.ok().body(personDetails);
+//        }
+//        personDetails.setStatus(403);
+//        personDetails.setMessage("Empty List");
+//        return ResponseEntity.notFound().build();
 //    }
 
-    @GetMapping("/api/v1/admin/viewPersons")
-    public ResponseEntity<AllPersons> findAllPersons() {
-        ArrayList<Person> allPersons = new ArrayList<>(personRepository.findAll());
-        AllPersons personDetails = new AllPersons();
-        ArrayList<UserDetails> userDetails = new ArrayList<>();
-
-        if(allPersons.size() > 0){
-            personDetails.setStatus(200);
-            personDetails.setMessage("All Persons found");
-            UserDetails allUserDetails;
-            for(Person person : allPersons){
-                allUserDetails = new UserDetails();
-                allUserDetails.setId(person.getId());
-                allUserDetails.setEmail(person.getEmail());
-                allUserDetails.setFirstName(person.getFirstName());
-                allUserDetails.setLastName(person.getLastName());
-                allUserDetails.setPassword(person.getPassword());
-                userDetails.add(allUserDetails);
-            }
-            personDetails.setPersons(userDetails);
-            return ResponseEntity.ok().body(personDetails);
-        }
-        personDetails.setStatus(403);
-        personDetails.setMessage("Empty List");
-        return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/api/v1/admin/viewProfiles")
+    @PostMapping("/api/v1/admin/viewProfiles")
     public List<WidowProfile> findAllWidowProfiles() {
         return widowProfileRepository.findAll();
     }
