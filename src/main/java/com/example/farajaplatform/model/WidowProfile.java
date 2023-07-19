@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.springframework.context.annotation.Primary;
 
 import java.sql.Date;
@@ -11,6 +12,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Getter
+@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "person_profile")
 public class WidowProfile {
 
@@ -45,135 +51,4 @@ public class WidowProfile {
     @JoinColumn(name="createdBy", referencedColumnName = "id")
     private Admin createdBy;
 
-
-
-    public WidowProfile() {
-    }
-
-    public WidowProfile(String title, String briefDescription, String county, String subcounty, Integer amount, String date, String email,
-                        Integer phoneNo, String fbAccount, String twitterAccount, String fileName) {
-        this.title = title;
-        BriefDescription = briefDescription;
-        this.county = county;
-        this.subcounty = subcounty;
-        Amount = amount;
-        this.date = date;
-        this.email = email;
-        this.phoneNo = phoneNo;
-        FbAccount = fbAccount;
-        TwitterAccount = twitterAccount;
-        this.fileName = fileName;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getBriefDescription() {
-        return BriefDescription;
-    }
-
-    public void setBriefDescription(String briefDescription) {
-        BriefDescription = briefDescription;
-    }
-
-    public String getCounty() {
-        return county;
-    }
-
-    public void setCounty(String county) {
-        this.county = county;
-    }
-
-    public String getSubcounty() {
-        return subcounty;
-    }
-
-    public void setSubcounty(String subcounty) {
-        this.subcounty = subcounty;
-    }
-
-    public Integer getAmount() {
-        return Amount;
-    }
-
-    public void setAmount(Integer amount) {
-        Amount = amount;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getPhoneNo() {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(Integer phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
-    public String getFbAccount() {
-        return FbAccount;
-    }
-
-    public void setFbAccount(String fbAccount) {
-        FbAccount = fbAccount;
-    }
-
-    public String getTwitterAccount() {
-        return TwitterAccount;
-    }
-
-    public void setTwitterAccount(String twitterAccount) {
-        TwitterAccount = twitterAccount;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Set<Person> getPersons() {
-        return persons;
-    }
-
-    public void setPersons(Set<Person> persons) {
-        this.persons = persons;
-    }
-
-    public Admin getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Admin createdBy) {
-        this.createdBy = createdBy;
-    }
 }

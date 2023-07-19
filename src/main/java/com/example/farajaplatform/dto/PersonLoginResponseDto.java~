@@ -18,7 +18,7 @@ class PersonDetails {
 @Getter
 @Setter
 public class PersonLoginResponseDto {
-    private Integer status;
+    private boolean success;
     private String message;
     private String token;
     private PersonDetails person;

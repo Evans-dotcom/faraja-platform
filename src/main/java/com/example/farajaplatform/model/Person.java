@@ -2,11 +2,17 @@ package com.example.farajaplatform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="person")
 public class Person {
 
@@ -25,93 +31,11 @@ public class Person {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "widowProfile_id")
     private WidowProfile widowProfile;
-//@OneToOne
-//@JoinColumn(name = "user_id")
-//private User user;
+
     @ManyToOne
     @JoinColumn(name="createdBy", referencedColumnName = "id")
     private Admin createdBy;
 
     
-    public Person() {
-    }
 
-    public Person(Integer id, String firstName,
-                  String lastName, String email, String password, String fileName, boolean status) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.fileName=fileName;
-        this.status = status;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getFileName() {return fileName;}
-
-    public void setFileName(String fileName) {this.fileName = fileName;}
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public Long getId() {
-        return null;
-    }
-
-    public WidowProfile getWidowProfile() {
-        return widowProfile;
-    }
-
-    public void setWidowProfile(WidowProfile widowProfile) {
-        this.widowProfile = widowProfile;
-    }
-
-    public Admin getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Admin createdBy) {
-        this.createdBy = createdBy;
-    }
 }

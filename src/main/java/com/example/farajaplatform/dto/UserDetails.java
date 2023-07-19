@@ -7,8 +7,11 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminDto {
-    private String username;
+public class UserDetails {
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String email;
     private String password;
 
 }

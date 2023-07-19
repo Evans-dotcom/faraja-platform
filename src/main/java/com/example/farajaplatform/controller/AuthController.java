@@ -1,7 +1,6 @@
 package com.example.farajaplatform.controller;
 
 import com.example.farajaplatform.dto.*;
-import com.example.farajaplatform.exception.AdminNotFoundException;
 import com.example.farajaplatform.exception.PersonNotFoundException;
 import com.example.farajaplatform.exception.ProfileAlreadyExistsException;
 import com.example.farajaplatform.exception.UserAlreadyExistsException;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +48,8 @@ public class AuthController {
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
+    AdminService adminService;
+    @Autowired
     JWTGenerator jwtGenerator;
     @Autowired
     MapperService mapperService;
@@ -63,47 +65,56 @@ public class AuthController {
     @Autowired
     WidowProfileRepository widowProfileRepository;
 
-
-    @PostMapping("api/v1/adminRegister")
+    @PostMapping("/adminRegister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
-        if (adminRepository.existsByUsername(adminDto.getUsername())) {
-            return new ResponseEntity<String>("Username is taken !! ", HttpStatus.BAD_REQUEST);
-        }
-        Admin admin = new Admin();
-        admin.setUsername(adminDto.getUsername());
-        admin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
-
-        adminRepository.save(admin);
-        return new ResponseEntity<String>("Admin Registered successfully !! ", HttpStatus.CREATED);
+        adminService.registerAdmin(adminDto.getUsername(), adminDto.getPassword());
+        return new ResponseEntity<>("Admin Registered successfully!", HttpStatus.CREATED);
     }
-
-    @PostMapping("/api/v1/admin/personRegister")
-    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                               @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
-
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        try {
-            Person person = mapperService.mapForm(data, Person.class);
-            person.setFileName(fileUploaderService.uploadFile(file));
-            personService.registerPerson(person);
-            System.out.println(fileUploaderService.uploadFile(file));
-            response.setMessage("Member Registered Successfully !!");
-            response.setSuccess(true);
-            String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
-//            Admin admin = adminRepository.findByUsername(adminUsername)
-//                    .orElseThrow(() -> new AdminNotFoundException("Admin not found")); // You may need to handle this exception
+//    @PostMapping("api/v1/adminRegister")
+//    public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
+//        if (adminRepository.existsByUsername(adminDto.getUsername())) {
+//            return new ResponseEntity<String>("Username is taken !! ", HttpStatus.BAD_REQUEST);
+//        }
+//        Admin admin = new Admin();
+//        admin.setUsername(adminDto.getUsername());
+//        admin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
 //
-//            person.setCreatedBy(admin);
-            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+//        adminRepository.save(admin);
+//        return new ResponseEntity<String>("Admin Registered successfully !! ", HttpStatus.CREATED);
+//    }
 
-        } catch (UserAlreadyExistsException ex) {
-            response.setMessage("Email Already Taken");
-            response.setSuccess(false);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
-        }
-    }
-
+//    @PostMapping("/api/v1/admin/personRegister")
+//    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
+//                                                               @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
+//
+//        SuccessandMessageDto response = new SuccessandMessageDto();
+//        try {
+//            Person person = mapperService.mapForm(data, Person.class);
+//            person.setFileName(fileUploaderService.uploadFile(file));
+//            personService.registerPerson(person);
+//            System.out.println(fileUploaderService.uploadFile(file));
+//            response.setMessage("Member Registered Successfully !!");
+//            response.setStatus(200);
+//            String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
+//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
+//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+//
+//        } catch (UserAlreadyExistsException ex) {
+//            response.setMessage("Email Already Taken");
+//            response.setStatus(409);
+//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
+//        }
+//    }
+@PostMapping("/admin/personRegister")
+public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data,
+                                                           @RequestPart("file") MultipartFile file,
+                                                           @RequestHeader(name = "Authorization") String token) throws UserAlreadyExistsException {
+    SuccessandMessageDto response = new SuccessandMessageDto();
+    adminService.registerPerson(data, file, token);
+    response.setMessage("Member Registered Successfully !!");
+    response.setStatus(200);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+}
     @PostMapping("/api/v1/admin/personProfile")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
                                                                      @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
@@ -114,7 +125,7 @@ public class AuthController {
         widowService.registerWidowProfile(widowProfile);
         System.out.println(imageUploaderService.uploadImage(file));
         response.setMessage("Profile Created Successfully !!");
-        response.setSuccess(true);
+        response.setStatus(200);
         widowProfile.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
         return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
@@ -130,7 +141,7 @@ public class AuthController {
 
         String token = jwtGenerator.generateToken(authentication, UserType.ADMIN.toString());
         AdminLoginResponseDto responseDto = new AdminLoginResponseDto();
-        responseDto.setSuccess(true);
+        responseDto.setStatus(200);
         responseDto.setMessage("login successful !!");
         responseDto.setToken(token);
         Admin admin = adminRepository.findByUsername(adminDto.getUsername()).orElseThrow();
@@ -148,13 +159,13 @@ public class AuthController {
             personService.registerPerson(person);
             System.out.println(fileUploaderService.uploadFile(file));
             response.setMessage("Member Registered Successfully !!");
-            response.setSuccess(true);
+            response.setStatus(200);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
 
         } catch (UserAlreadyExistsException ex) {
             SuccessandMessageDto response = new SuccessandMessageDto();
             response.setMessage("Email Already Taken");
-            response.setSuccess(false);
+            response.setStatus(409);
             return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
         }
     }
@@ -168,9 +179,10 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtGenerator.generateToken(authentication, UserType.PERSON.toString());
         PersonLoginResponseDto responseDto = new PersonLoginResponseDto();
-        responseDto.setSuccess(true);
+        responseDto.setStatus(200);
         responseDto.setMessage("login successful !!");
         responseDto.setToken(token);
+        responseDto.getPerson();
         Person person = personRepository.findByEmailIgnoreCase(personLoginDto.getEmail()).orElseThrow();
         responseDto.setPerson(person.getId(), person.getFirstName(), person.getLastName(), person.getEmail(), person.getPassword());
         return new ResponseEntity<PersonLoginResponseDto>(responseDto, HttpStatus.OK);
@@ -182,7 +194,7 @@ public class AuthController {
         SuccessandMessageDto response = new SuccessandMessageDto();
         if (!(personRepository.existsById(id))) {
             response.setMessage("Person does Not exist");
-            response.setSuccess(false);
+            response.setStatus(403);
             return new ResponseEntity<SuccessandMessageDto>(response,
                     HttpStatus.BAD_REQUEST);
         }
@@ -196,7 +208,7 @@ public class AuthController {
         person.setStatus(true);
         personRepository.save(person);
         response.setMessage("Person updated successfully");
-        response.setSuccess(true);
+        response.setStatus(200);
         return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
@@ -206,7 +218,7 @@ public class AuthController {
         SuccessandMessageDto response = new SuccessandMessageDto();
         if (!(personRepository.existsById(id))) {
             response.setMessage("Person does Not exist");
-            response.setSuccess(false);
+            response.setStatus(404);
             return new ResponseEntity<SuccessandMessageDto>(response,
                     HttpStatus.BAD_REQUEST);
         }
@@ -217,7 +229,7 @@ public class AuthController {
         person.setStatus(true);
         personRepository.save(person);
         response.setMessage("Person Password updated successfully");
-        response.setSuccess(true);
+        response.setStatus(200);
         return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
@@ -228,12 +240,12 @@ public class AuthController {
 
             SuccessandMessageDto response = new SuccessandMessageDto();
             response.setMessage("Person deleted successfully!");
-            response.setSuccess(true);
+            response.setStatus(200);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (PersonNotFoundException ex) {
             SuccessandMessageDto response = new SuccessandMessageDto();
             response.setMessage("Person not found!");
-            response.setSuccess(false);
+            response.setStatus(404);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -247,15 +259,15 @@ public class AuthController {
         try {
             widowService.registerWidowProfile(widowProfile.getEmail(), widowProfile);
             response.setMessage("Profile Created Successfully!");
-            response.setSuccess(true);
+            response.setStatus(200);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (ProfileAlreadyExistsException e) {
             response.setMessage("Profile with the same email already exists!");
-            response.setSuccess(false);
+            response.setStatus(409);
             return new ResponseEntity<>(response, HttpStatus.CONFLICT);
         } catch (PersonNotFoundException e) {
             response.setMessage("User not found!");
-            response.setSuccess(false);
+            response.setStatus(404);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -275,13 +287,35 @@ public class AuthController {
 //
 //    }
 
-    @GetMapping("/api/v1/adminviewPersons")
-    public List<Person> findAllPerson() {
-        return personRepository.findAll();
+    @GetMapping("/api/v1/admin/viewPersons")
+    public ResponseEntity<AllPersons> findAllPersons() {
+        ArrayList<Person> allPersons = new ArrayList<>(personRepository.findAll());
+        AllPersons personDetails = new AllPersons();
+        ArrayList<UserDetails> userDetails = new ArrayList<>();
+
+        if(allPersons.size() > 0){
+            personDetails.setStatus(200);
+            personDetails.setMessage("All Persons found");
+            UserDetails allUserDetails;
+            for(Person person : allPersons){
+                allUserDetails = new UserDetails();
+                allUserDetails.setId(person.getId());
+                allUserDetails.setEmail(person.getEmail());
+                allUserDetails.setFirstName(person.getFirstName());
+                allUserDetails.setLastName(person.getLastName());
+                allUserDetails.setPassword(person.getPassword());
+                userDetails.add(allUserDetails);
+            }
+            personDetails.setPersons(userDetails);
+            return ResponseEntity.ok().body(personDetails);
+        }
+        personDetails.setStatus(403);
+        personDetails.setMessage("Empty List");
+        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/api/v1/viewProfiles")
-    public List<WidowProfile> findAllWidowProfile() {
+    @GetMapping("/api/v1/admin/viewProfiles")
+    public List<WidowProfile> findAllWidowProfiles() {
         return widowProfileRepository.findAll();
     }
 
@@ -311,12 +345,12 @@ public class AuthController {
 
           SuccessandMessageDto response = new SuccessandMessageDto();
           response.setMessage("Logout successful");
-          response.setSuccess(true);
+          response.setStatus(200);
           return new ResponseEntity<>(response, HttpStatus.OK);
       }
         SuccessandMessageDto response = new SuccessandMessageDto();
         response.setMessage("Invalid request");
-        response.setSuccess(false);
+        response.setStatus(403);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
