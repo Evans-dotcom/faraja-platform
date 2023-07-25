@@ -26,8 +26,8 @@ public class WidowProfile {
     @Column(name="title",length = 50)
     private String title;
 
-    @Column(name = "BriefDescription",length = 3000,nullable = false)
-    private String BriefDescription;
+    @Column(name = "briefDescription",length = 3000,nullable = false)
+    private String briefDescription;
     private String county;
 
     private String subcounty;
