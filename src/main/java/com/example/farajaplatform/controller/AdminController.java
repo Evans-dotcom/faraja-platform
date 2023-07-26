@@ -1,14 +1,15 @@
 package com.example.farajaplatform.controller;
 
 import com.example.farajaplatform.dto.AdminDto;
+import com.example.farajaplatform.dto.AdminLoginResponseDto;
 import com.example.farajaplatform.dto.AllPersons;
 import com.example.farajaplatform.dto.SuccessandMessageDto;
 import com.example.farajaplatform.exception.UserAlreadyExistsException;
 import com.example.farajaplatform.model.Person;
-import com.example.farajaplatform.model.WidowProfile;
+import com.example.farajaplatform.model.PersonProfile;
 import com.example.farajaplatform.repository.AdminRepository;
 import com.example.farajaplatform.repository.PersonRepository;
-import com.example.farajaplatform.repository.WidowProfileRepository;
+import com.example.farajaplatform.repository.PersonProfileRepository;
 import com.example.farajaplatform.security.JWTGenerator;
 import com.example.farajaplatform.service.*;
 import jakarta.validation.Valid;
@@ -50,54 +51,25 @@ public class AdminController {
     @Autowired
     PersonService personService;
     @Autowired
-    WidowService widowService;
-    WidowProfile widowProfile;
+    PersonProfileService personProfileService;
+    PersonProfile personProfile;
     @Autowired
-    WidowProfileRepository widowProfileRepository;
+    PersonProfileRepository personProfileRepository;
 
-    @PostMapping("/api/v1/adminRegister")
+    @PostMapping("/api/v1/adminregister")
     public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
         adminService.registerAdmin(adminDto.getUsername(), adminDto.getPassword());
         return new ResponseEntity<>("Admin Registered successfully!", HttpStatus.CREATED);
     }
-//    @PostMapping("api/v1/adminRegister")
-//    public ResponseEntity<String> adminRegister(@RequestBody AdminDto adminDto) {
-//        if (adminRepository.existsByUsername(adminDto.getUsername())) {
-//            return new ResponseEntity<String>("Username is taken !! ", HttpStatus.BAD_REQUEST);
-//        }
-//        Admin admin = new Admin();
-//        admin.setUsername(adminDto.getUsername());
-//        admin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
-//
-//        adminRepository.save(admin);
-//        return new ResponseEntity<String>("Admin Registered successfully !! ", HttpStatus.CREATED);
-//    }
-//    @PostMapping("/api/v1/admin/personRegister")
-//    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-//                                                               @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException {
-//
-//        SuccessandMessageDto response = new SuccessandMessageDto();
-//        try {
-//            Person person = mapperService.mapForm(data, Person.class);
-//            person.setFileName(fileUploaderService.uploadFile(file));
-//            personService.registerPerson(person);
-//            System.out.println(fileUploaderService.uploadFile(file));
-//            response.setMessage("Member Registered Successfully !!");
-//            response.setStatus(200);
-//            String adminUsername = jwtGenerator.getUsernameFromJWT(token.substring(7));
-//            person.setCreatedBy(adminRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token.substring(7))).orElseThrow());
-//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
-//
-//        } catch (UserAlreadyExistsException ex) {
-//            response.setMessage("Email Already Taken");
-//            response.setStatus(409);
-//            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
-//        }
-//    }
-    @PostMapping("/api/v1/admin/personRegister")
+    @PostMapping("/api/v1/adminlogin")
+    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminDto adminDto) {
+        AdminLoginResponseDto response = adminService.login(adminDto);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/api/v1/admin/personregister")
     public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data,
                                                                @RequestPart("file") MultipartFile file,
-                                                               @RequestHeader(name = "Authorization") String token) throws UserAlreadyExistsException {
+                                                               @RequestHeader(name = "Authorization") String token) throws UserAlreadyExistsException, IOException {
         SuccessandMessageDto response = new SuccessandMessageDto();
         adminService.registerPerson(data, file, token);
         response.setMessage("Member Registered Successfully !!");
@@ -105,19 +77,19 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/api/v1/admin/personProfile")
+    @PostMapping("/api/v1/admin/createprofile")
     public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file,
-                                                                     @RequestHeader(name = "Authorization") String token) throws IOException, UserAlreadyExistsException, IOException {
+                                                                     @RequestHeader(name = "Authorization") String token) throws UserAlreadyExistsException, IOException {
         SuccessandMessageDto response = adminService.registerWidowProfile(data, file, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
-    @DeleteMapping("/api/v1/personDelete/{id}")
+    @DeleteMapping("/api/v1/persondelete/{id}")
     public ResponseEntity<SuccessandMessageDto> deletePerson(@PathVariable("id") Integer id) {
         return adminService.deletePerson(id);
     }
-    @PostMapping("/api/v1/admin/viewPersons")
+    @PostMapping("/api/v1/admin/viewpersons")
     public AllPersons findAllPersons() {
         return adminService.findAllPersons();
     }

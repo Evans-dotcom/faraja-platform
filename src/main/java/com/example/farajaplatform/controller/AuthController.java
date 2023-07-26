@@ -4,13 +4,12 @@ import com.example.farajaplatform.dto.*;
 import com.example.farajaplatform.exception.PersonNotFoundException;
 import com.example.farajaplatform.exception.ProfileAlreadyExistsException;
 import com.example.farajaplatform.exception.UserAlreadyExistsException;
-import com.example.farajaplatform.model.Admin;
 import com.example.farajaplatform.model.Person;
 import com.example.farajaplatform.model.UserType;
-import com.example.farajaplatform.model.WidowProfile;
+import com.example.farajaplatform.model.PersonProfile;
 import com.example.farajaplatform.repository.AdminRepository;
 import com.example.farajaplatform.repository.PersonRepository;
-import com.example.farajaplatform.repository.WidowProfileRepository;
+import com.example.farajaplatform.repository.PersonProfileRepository;
 import com.example.farajaplatform.security.JWTGenerator;
 import com.example.farajaplatform.service.*;
 import com.example.farajaplatform.service.FileUploaderService;
@@ -29,8 +28,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -41,185 +38,48 @@ public class AuthController {
     @Autowired
     PersonRepository personRepository;
     Person person;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    CustomUserDetailsService customUserDetailsService;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+
     @Autowired
     AdminService adminService;
     @Autowired
-    JWTGenerator jwtGenerator;
-    @Autowired
-    MapperService mapperService;
-    @Autowired
-    FileUploaderService fileUploaderService;
-    @Autowired
-    ImageUploaderService imageUploaderService;
+    PasswordEncoder passwordEncoder;
     @Autowired
     PersonService personService;
     @Autowired
-    WidowService widowService;
-    WidowProfile widowProfile;
-    @Autowired
-    WidowProfileRepository widowProfileRepository;
+    PersonProfileService personProfileService;
 
-    @PostMapping("/api/v1/personRegister")
-    public ResponseEntity<SuccessandMessageDto> registerPerson(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
+    @PostMapping("/api/v1/personregister")
+    public ResponseEntity<PersonRegistrationResponseDto> registerPerson(@Valid @RequestPart("data") String data,
+                                                               @RequestPart("file") MultipartFile file) throws IOException {
+        return personService.registerPerson(data, file);
 
-        try {
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            Person person = mapperService.mapForm(data, Person.class);
-            person.setFileName(fileUploaderService.uploadFile(file));
-            personService.registerPerson(person);
-            System.out.println(fileUploaderService.uploadFile(file));
-            response.setMessage("Member Registered Successfully !!");
-            response.setStatus(200);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
-
-        } catch (UserAlreadyExistsException ex) {
-            SuccessandMessageDto response = new SuccessandMessageDto();
-            response.setMessage("Email Already Taken");
-            response.setStatus(409);
-            return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.CONFLICT);
-        }
     }
 
-    @PostMapping("api/v1/personLogin")
+    @PostMapping("api/v1/personlogin")
     public ResponseEntity<PersonLoginResponseDto> PersonLogin(@RequestBody PersonLoginDto personLoginDto) {
-        System.out.println("personLogin");
-        customUserDetailsService.setUserType(UserType.PERSON);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(personLoginDto.getEmail(), personLoginDto.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtGenerator.generateToken(authentication, UserType.PERSON.toString());
-        PersonLoginResponseDto responseDto = new PersonLoginResponseDto();
-        responseDto.setStatus(200);
-        responseDto.setMessage("login successful !!");
-        responseDto.setToken(token);
-        Person person = personRepository.findByEmailIgnoreCase(personLoginDto.getEmail()).orElseThrow();
-        responseDto.setPerson(person.getId(), person.getFirstName(), person.getLastName(), person.getEmail(), person.getPassword());
-        return new ResponseEntity<PersonLoginResponseDto>(responseDto, HttpStatus.OK);
-    }
 
-    @PutMapping("/api/v1/updatePerson/{id}")
+            return personService.personLogin(personLoginDto);
+
+        }
+
+    @PutMapping("/api/v1/updateperson/{id}")
     public ResponseEntity<SuccessandMessageDto> updatePerson(@PathVariable Integer id, @RequestBody PersonUpdate personUpdate) {
-        System.out.println("personUpdate");
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        if (!(personRepository.existsById(id))) {
-            response.setMessage("Person does Not exist");
-            response.setStatus(403);
-            return new ResponseEntity<SuccessandMessageDto>(response,
-                    HttpStatus.BAD_REQUEST);
-        }
-        Optional<Person> Person = personRepository.findById(id);
-        Person person = Person.get();
-        person.setFirstName(personUpdate.getFirstName());
-        person.setLastName(personUpdate.getLastName());
-        person.setEmail(personUpdate.getEmail());
-        person.setPassword(passwordEncoder.encode(person.getPassword()));
 
-        person.setStatus(true);
-        personRepository.save(person);
-        response.setMessage("Person updated successfully");
-        response.setStatus(200);
-        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
+        return personService.updatePerson(id, personUpdate);
+
     }
 
-    @PutMapping("/api/v1/updatePersonPassword/{id}")
+    @PutMapping("/api/v1/updatepersonpassword/{id}")
     public ResponseEntity<SuccessandMessageDto> updatePersonPassword(@PathVariable Integer id, @RequestBody PersonPasswordUpdate personPasswordUpdate) {
-        System.out.println("personPasswordUpdate");
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        if (!(personRepository.existsById(id))) {
-            response.setMessage("Person does Not exist");
-            response.setStatus(404);
-            return new ResponseEntity<SuccessandMessageDto>(response,
-                    HttpStatus.BAD_REQUEST);
-        }
-        Optional<Person> Person = personRepository.findById(id);
-        Person person = Person.get();
-        person.setPassword(passwordEncoder.encode(personPasswordUpdate.getPassword()));
+        return personService.updatePersonPassword(id, personPasswordUpdate);
 
-        person.setStatus(true);
-        personRepository.save(person);
-        response.setMessage("Person Password updated successfully");
-        response.setStatus(200);
-        return new ResponseEntity<SuccessandMessageDto>(response, HttpStatus.OK);
     }
 
 
-    @PostMapping("/api/v1/widowRegister")
-    public ResponseEntity<SuccessandMessageDto> registerWidowProfile(@Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
-        SuccessandMessageDto response = new SuccessandMessageDto();
-        WidowProfile widowProfile = mapperService.mapForm(data, WidowProfile.class);
-        widowProfile.setFileName(imageUploaderService.uploadImage(file));
-
-        try {
-            widowService.registerWidowProfile(widowProfile.getEmail(), widowProfile);
-            response.setMessage("Profile Created Successfully!");
-            response.setStatus(200);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (ProfileAlreadyExistsException e) {
-            response.setMessage("Profile with the same email already exists!");
-            response.setStatus(409);
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-        } catch (PersonNotFoundException e) {
-            response.setMessage("User not found!");
-            response.setStatus(404);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-//    @GetMapping("/api/v1/admin/viewPersons")
-//    public ResponseEntity<AllPersons> findAllPersons() {
-//        ArrayList<Person> allPersons = new ArrayList<>(personRepository.findAll());
-//        AllPersons personDetails = new AllPersons();
-//        ArrayList<UserDetails> userDetails = new ArrayList<>();
-//
-//        if(allPersons.size() > 0){
-//            personDetails.setStatus(200);
-//            personDetails.setMessage("All Persons found");
-//            UserDetails allUserDetails;
-//            for(Person person : allPersons){
-//                allUserDetails = new UserDetails();
-//                allUserDetails.setId(person.getId());
-//                allUserDetails.setEmail(person.getEmail());
-//                allUserDetails.setFirstName(person.getFirstName());
-//                allUserDetails.setLastName(person.getLastName());
-//                allUserDetails.setPassword(person.getPassword());
-//                userDetails.add(allUserDetails);
-//            }
-//            personDetails.setPersons(userDetails);
-//            return ResponseEntity.ok().body(personDetails);
-//        }
-//        personDetails.setStatus(403);
-//        personDetails.setMessage("Empty List");
-//        return ResponseEntity.notFound().build();
-//    }
-
-    @PostMapping("/api/v1/admin/viewProfiles")
-    public List<WidowProfile> findAllWidowProfiles() {
-        return widowProfileRepository.findAll();
-    }
-
-//    @GetMapping("/api/v1/listProfiles")
-//    public List<WidowProfile> findAllWidowProfile(HttpServletRequest request) {
-//        String authorizationHeader = request.getHeader("Authorization");
-//
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-//
-//            String token = authorizationHeader.substring(7);
-//            return widowProfileRepository.findAll();
-//        }
-//        return null;
-//    }
-
-    //todo load more profiles in Db
-    //todo Mpesa endpoints
+        //todo Mpesa endpoints
 
 
-    @PostMapping("/api/v1/personLogout")
+    @PostMapping("/api/v1/personlogout")
     public ResponseEntity<SuccessandMessageDto> personLogout(HttpServletRequest request) {
       String authorizationHeader = request.getHeader("Authorization");
 

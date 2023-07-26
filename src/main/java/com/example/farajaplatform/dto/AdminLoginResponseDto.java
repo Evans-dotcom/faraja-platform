@@ -26,5 +26,9 @@ public class AdminLoginResponseDto {
     private AdminDetails admin;
 
     public void setAdmin(String username, int id) {
+        this.admin = AdminDetails.builder()
+                .username(username)
+                .id(id)
+                .build();
     }
 }

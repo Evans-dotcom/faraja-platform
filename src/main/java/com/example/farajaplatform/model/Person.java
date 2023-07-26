@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -28,13 +25,11 @@ public class Person {
     private boolean status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "widowProfile_id")
-    private WidowProfile widowProfile;
+    @JoinColumn(name = "personProfile_id")
+    private PersonProfile personProfile;
 
     @ManyToOne
     @JoinColumn(name="createdBy", referencedColumnName = "id")
     private Admin createdBy;
-
-    
 
 }

@@ -2,12 +2,8 @@ package com.example.farajaplatform.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.context.annotation.Primary;
 
-import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "person_profile")
-public class WidowProfile {
+public class PersonProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +40,7 @@ public class WidowProfile {
     private String TwitterAccount;
     private String fileName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "widowProfile")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "personProfile")
     private Set<Person> persons = new HashSet<>();
     @ManyToOne
     @JoinColumn(name="createdBy", referencedColumnName = "id")

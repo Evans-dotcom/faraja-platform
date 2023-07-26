@@ -3,6 +3,7 @@ package com.example.farajaplatform.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,14 @@ public class JWTGenerator {
                 .getBody();
         return claims.get("usertype").toString();
     }
+    public String resolveToken(HttpServletRequest request) {
+        String token = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+        if (token != null && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            return token.substring(SecurityConstants.TOKEN_PREFIX.length());
+        }
+        return null;
+    }
+
 
     public boolean validateToken(String token) {
         try {

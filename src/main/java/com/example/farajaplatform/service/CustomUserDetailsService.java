@@ -21,10 +21,10 @@ import java.util.Collection;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private AdminRepository adminRepository;
+    AdminRepository adminRepository;
 
     @Autowired
-    private PersonRepository personRepository;
+    PersonRepository personRepository;
 
     private UserType userType;
 
